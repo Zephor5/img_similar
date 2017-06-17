@@ -22,8 +22,26 @@ Mat get_fp_from_str(PyObject* o){
     return get_fp(img);
 }
 
+list get_fps(PyObject* o){
+    std::string* fps;
+    list res;
+    fps = (std::string*)std::malloc(sizeof(std::string) * 4);
+    Mat img = decode_imgbytes(o);
+    int blur_size=(img.size[0] > img.size[1] ? img.size[0] : img.size[1]) / 20;
+    blur(img, img, Size(blur_size, blur_size));
+    set_fp_size(PART_SIZE * 2);
+    Mat fp = get_fp(img);
+    get_fp_strs(fp, fps);
+    for(int i=0; i < 4; i++){
+        res.append(str(fps[i]));
+    }
+    free(fps);
+    return res;
+}
 
-double get_similarity(PyObject* img1, PyObject* img2){
+
+double get_similarity(PyObject* img1, PyObject* img2, int fp_size=64){
+    set_fp_size(fp_size);
     return calc_similarity(get_fp(decode_imgbytes(img1)), get_fp(decode_imgbytes(img2)));
 }
 
@@ -44,13 +62,6 @@ BOOST_PYTHON_MODULE(img_similar){
     to_python_converter<cv::Mat,
             pbcvt::matToNDArrayBoostConverter>();
     pbcvt::matFromNDArrayBoostConverter();
-    // This function needs to be included to pass PyObjects as numpy array ( http://mail.python.org/pipermail/cplusplus-sig/2006-September/011021.html )
-//    boost::python::converter::registry::insert( &extract_pyarray, type_id<PyArrayObject>( ) );
-    def("get_fp_from_nparr", get_fp);
-    def("get_fp_from_str", get_fp_from_str);
-    def("calc_similarity", calc_similarity);
-    def("get_similarity", get_similarity);
-    def("set_fp_size", set_fp_size);
-//    def("get_similarity_", get_similarity);
-    def("decode_imgbytes", decode_imgbytes);
+    def("get_similarity", get_similarity, (arg("img1"), arg("img1"), arg("fp_size")=64));
+    def("get_fps", get_fps);
 }

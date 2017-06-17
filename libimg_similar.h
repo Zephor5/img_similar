@@ -17,6 +17,7 @@ using namespace cv;
 
 Mat decode_imgbytes(PyObject* o);
 Mat get_fp_from_str(PyObject* o);
-double get_similarity(PyObject* img1, PyObject* img2);
+list get_fps(PyObject* o);
+double get_similarity(PyObject* img1, PyObject* img2, int fp_size);
 
 #endif //IMG_SIMILAR_LIBIMG_SIMILAR_H

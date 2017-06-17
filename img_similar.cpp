@@ -3,10 +3,7 @@
 //
 #include "img_similar.h"
 
-
 int FP_SIZE = 64;
-int FP_BLUR = 3;
-
 
 bool set_fp_size(int size){
     if(size < 5 || size > 300){
@@ -97,4 +94,50 @@ double calc_similarity(Mat fp1, Mat fp2){
     double similar = 1 - (ori_diffn * 0.2 + blur_diffn * 0.8)/ori_diff.total();
 //    cout << "similarity: " << similar << endl;
     return similar;
+}
+
+
+char bit4_2_hexchar(std::string s){
+    if(s.size() != 4){
+        throw std::exception();
+    }
+    std::bitset<4> a(s);
+    std::stringstream res;
+    res << std::hex << std::uppercase << a.to_ulong();
+    return res.str().c_str()[0];
+}
+
+
+static std::bitset<PART_LEN> get_bytes(Mat fp){
+    std::bitset<PART_LEN> res;
+    for(int i=0; i < fp.rows; i++){
+        for(int j=0; j < fp.cols; j++){
+            res[i * fp.cols + j] = fp.at<bool>(i, j);
+        }
+    }
+    return res;
+}
+
+void get_fp_strs(Mat fp, std::string res[4]){
+    std::string bits;
+    Mat fps[4];
+    std::bitset<PART_LEN> bitss[4];
+
+    for(int i=0; i < 4; i++) {
+        fps[i] = fp(Rect(i % 2 * PART_SIZE, i / 2 * PART_SIZE, PART_SIZE, PART_SIZE));
+        bitss[i] = get_bytes(fps[i]);
+    }
+    for(int i=0; i < 4; i++){
+        bits = "";
+        for(int x=0; x < (4 - (PART_LEN * 3 % 4)) % 4; x++){
+            bits += "0";
+        }
+        for(int j=0; j < 4; j++){
+            if(j==i) continue;
+            bits += bitss[j].to_string();
+        }
+        res[i].resize((u_long)PART_FP_LEN);
+        for(uint k=0; k < PART_FP_LEN; k++)
+            res[i][k] = bit4_2_hexchar(bits.substr(k * 4, 4));
+    }
 }

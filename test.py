@@ -15,12 +15,14 @@ from PIL import Image
 # print sim.get_similarity(ima1, ima2)
 # print "take ", time.time() - start
 
-print sim.set_fp_size(7)
+# print sim.set_fp_size(7)
 start = time.time()
 f1 = open("samples/take7.jpg")
 f2 = open("samples/take8.jpg")
 # time.sleep(1)
-print sim.get_similarity(f1.read(), f2.read())
+cont1=f1.read()
+print sim.get_similarity(cont1, f2.read())
+print sim.get_fps(cont1)
 print "q take ", time.time() - start
 
 
